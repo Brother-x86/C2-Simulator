@@ -123,7 +123,7 @@ async fn main() {
     info!("Links configured :");
     for link in &links {
         info!(
-            "  - {:<width$} | sleep={:<8} | jitt={:<6} | {:<5?}",
+            "  - {:<width$} | sleep={:<1} | jitt={:<1} | {:?}",
             link.url,
             link.sleep_str,
             format!("{}s", link.jitt),
@@ -131,10 +131,10 @@ async fn main() {
             width = max_len
         );
     }
-    info!("RUN mode={:?}", args.mode);
+    info!("RUN mode: {:?}", args.mode);
 
     if args.dry_run {
-        info!("Dry run, arrêt.");
+        info!("Dry run, STOP");
         return;
     }
 
