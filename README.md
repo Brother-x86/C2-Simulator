@@ -3,7 +3,7 @@
 ## help
 
 ```
-Un programme qui accepte va simuler des flux comme un C2
+Simule des flux réseau comme un C2
 
 Usage: C2-Simulator [OPTIONS] --url <URL> --sleep <SLEEP> --jitt <JITT>
 
@@ -14,9 +14,18 @@ Options:
   -a, --user-agent <USER-AGENT>  User-Agent [default: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0"]
   -d, --debug                    Debug, rajoute les logs de type debug
   -m, --mode <MODE>              Mode d'exécution [default: alternate] [possible values: parallel, alternate]
+  -t, --type <type>              Session Type [default: short] [possible values: short, long]
   -i, --iteration <ITERATION>    Nombre d'itérations (-1 = infini) [default: -1]
   -h, --help                     Print help
 ```
+
+précision:
+
+```
+Chaque -u peut être accompagné de son propre -s, -j et -t : les paramètres s'appliquent dans l'ordre aux URLs fournies.
+Si une URL n'a pas de valeur correspondante, elle hérite de la dernière valeur spécifiée — ou de la valeur par défaut si aucune n'a été fournie.
+```
+
 
 ## run
 
@@ -77,3 +86,13 @@ asyncio.run(main())
 "
 
 ```
+
+
+# Sessions Short vs Long
+
+| | Short | Long |
+|---|---|---|
+| **HTTP** | nouvelle connexion TCP à chaque hit | connexion maintenue ouverte pendant le sleep (keep-alive) |
+| **WebSocket** | connect → ping → disconnect | connect → ping en boucle → reconnexion auto si drop |
+
+> Le **sleep+jitt** se passe *entre* les connexions en Short, et *pendant* la connexion en Long.

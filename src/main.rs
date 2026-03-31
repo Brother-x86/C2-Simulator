@@ -13,7 +13,8 @@ use log::info;
 
 #[derive(Parser, Debug)]
 #[command(name = "C2-Simulator")]
-#[command(about = "Un programme qui accepte va simuler des flux comme un C2")]
+#[command(about = "Simule des flux réseau comme un C2")]
+//#[command(long_about = "Simule des flux réseau comme un C2.\n\nChaque -u peut être accompagné de son propre -s, -j et -t : les paramètres s'appliquent dans l'ordre aux URLs fournies.\nSi une URL n'a pas de valeur correspondante, elle hérite de la dernière valeur spécifiée — ou de la valeur par défaut si aucune n'a été fournie.")]
 
 struct Args {
     /// URL(s) à traiter (répétable : -u url1 -u url2)
