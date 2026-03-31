@@ -16,6 +16,8 @@ Options:
   -m, --mode <MODE>              Mode d'exécution [default: alternate] [possible values: parallel, alternate]
   -t, --type <type>              Session Type [default: short] [possible values: short, long]
   -i, --iteration <ITERATION>    Nombre d'itérations (-1 = infini) [default: -1]
+  -r, --dry-run                  Dry run : affiche la configuration et quitte sans exécuter
+  -b, --banner                   Awesome Banner
   -h, --help                     Print help
 ```
 
