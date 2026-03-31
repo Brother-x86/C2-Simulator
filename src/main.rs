@@ -124,8 +124,8 @@ async fn main() {
     info!("RUN mode={:?}", args.mode);
 
     match args.mode {
-        mode::Mode::Parallel => run_parallel(&links, args.iteration).await,
-        mode::Mode::Alternate => run_alternate(&links, args.iteration).await,
+        mode::Mode::Parallel => run_parallel(&links, args.iteration,&args.user_agent).await,
+        mode::Mode::Alternate => run_alternate(&links, args.iteration,&args.user_agent).await,
     };
 }
 

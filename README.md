@@ -27,7 +27,31 @@ Si une URL n'a pas de valeur correspondante, elle hérite de la dernière valeur
 ```
 
 
-## run
+## Protocoles supportés
+
+| Schéma | Short | Long |
+|---|---|---|
+| `http://` `https://` | nouvelle connexion à chaque hit | keep-alive pendant le sleep |
+| `ws://` `wss://` | connect → ping → close | connect → ping → sleep connecté → close |
+| `tcp://host:port` | connect → payload aléatoire → close | connect → payload → sleep → close |
+| `udp://host:port` | bind → send → close | bind → send → écoute réponse (timeout=sleep) → close |
+
+> Les payloads TCP/UDP sont des bytes aléatoires de taille aléatoire (1–64 bytes).
+
+
+## Sessions Short vs Long
+
+| | Short | Long |
+|---|---|---|
+| **HTTP** | nouvelle connexion TCP à chaque hit | connexion maintenue ouverte pendant le sleep (keep-alive) |
+| **WebSocket** | connect → ping → disconnect | connect → ping en boucle → reconnexion auto si drop |
+
+> Le **sleep+jitt** se passe *entre* les connexions en Short, et *pendant* la connexion en Long.
+
+
+
+
+# run
 
 juste un lien
 ```
@@ -61,6 +85,12 @@ cargo run -- -u ws://flameshot.website:8000 --sleep 3s --jitt 15 -u https://gith
 [2026-03-31T05:56:29Z INFO  C2_Simulator::link] #10 https://github.com → sleep 2+0s = 2s
 ```
 
+longue session
+
+```
+cargo run -- -u ws://flameshot.website:8000 --sleep 120s --jitt 1 --type long -u https://github.com -s2 -j1 --type short
+```
+
 
 ## simulate Websocket serveur
 
@@ -84,15 +114,18 @@ async def main():
 
 asyncio.run(main())
 "
-
 ```
 
+## simulate tcp server
 
-# Sessions Short vs Long
+tcp 
 
-| | Short | Long |
-|---|---|---|
-| **HTTP** | nouvelle connexion TCP à chaque hit | connexion maintenue ouverte pendant le sleep (keep-alive) |
-| **WebSocket** | connect → ping → disconnect | connect → ping en boucle → reconnexion auto si drop |
+```
+while true; do nc -lvp 8000; done
+```
 
-> Le **sleep+jitt** se passe *entre* les connexions en Short, et *pendant* la connexion en Long.
+udp
+
+```
+nc -lvup 8000
+```
