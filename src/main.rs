@@ -1,7 +1,14 @@
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 
 mod link;
 use link::Link;
+mod mode;
+use mode::Mode;
+
+extern crate env_logger;
+use log::debug;
+use log::info;
+use log::warn;
 
 
 #[derive(Parser, Debug)]
@@ -21,7 +28,6 @@ struct Args {
     #[arg(short = 'j', long = "jitt", required = true, value_name = "JITT")]
     jitt: Vec<u32>,
 
-
     /// User-Agent
     #[arg(short = 'a', long = "user-agent", value_name = "USER-AGENT",default_value = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0")]
     user_agent: String,
@@ -35,16 +41,6 @@ struct Args {
     mode: Mode,
 
 }
-
-#[derive(Debug, Clone, ValueEnum)]
-enum Mode {
-    Parallel,
-    Alternate,
-}
-
-extern crate env_logger;
-use log::debug;
-use log::info;
 
 fn main() {
     let args = Args::parse();
