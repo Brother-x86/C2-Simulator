@@ -5,3 +5,10 @@ pub enum Mode {
     Parallel,
     Alternate,
 }
+
+
+#[derive(Debug, Clone, ValueEnum, PartialEq)]
+pub enum SessionType {
+    Short,
+    Long,
+}
