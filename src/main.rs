@@ -54,10 +54,14 @@ struct Args {
     /// Session Type
     #[arg(short = 't', long = "type", default_value = "short", name = "type")]
     session_type: Vec<SessionType>,
-    
+
     /// Nombre d'itérations (-1 = infini)
     #[arg(short = 'i', long = "iteration", default_value = "-1")]
     iteration: i64,
+
+    /// Dry run : affiche la configuration et quitte sans exécuter
+    #[arg(short = 'r',long = "dry-run")]
+    dry_run: bool,
 }
 
 #[tokio::main]
@@ -94,38 +98,49 @@ async fn main() {
         })
         .collect();
 
-        use itertools::izip;
+    use itertools::izip;
 
-        let session_types = normalize_vec(args.session_type, n);
-        
-        let links: Vec<Link> = izip!(
-            args.urls.iter(),
-            sleep_normalized.iter(),
-            sleep_secs.iter(),
-            jitt.iter(),
-            session_types.iter()
-        )
-        .map(|(url, sleep_str, sleep, jitt, session_type)| Link {
-            url: url.clone(),
-            sleep_str: sleep_str.clone(),
-            sleep: *sleep,
-            jitt: *jitt,
-            session_type: session_type.clone(),
-        })
-        .collect();
-        
-        
+    let session_types = normalize_vec(args.session_type, n);
+
+    let links: Vec<Link> = izip!(
+        args.urls.iter(),
+        sleep_normalized.iter(),
+        sleep_secs.iter(),
+        jitt.iter(),
+        session_types.iter()
+    )
+    .map(|(url, sleep_str, sleep, jitt, session_type)| Link {
+        url: url.clone(),
+        sleep_str: sleep_str.clone(),
+        sleep: *sleep,
+        jitt: *jitt,
+        session_type: session_type.clone(),
+    })
+    .collect();
+
+    let max_len = links.iter().map(|l| l.url.len()).max().unwrap_or(0);
+
+    info!("Links configured :");
     for link in &links {
         info!(
-            "url={} sleep={} ({}s) jitt={} type={:?}",
-            link.url, link.sleep_str, link.sleep, link.jitt, link.session_type
+            "  - {:<width$} | sleep={:<8} | jitt={:<6} | {:<5?}",
+            link.url,
+            link.sleep_str,
+            format!("{}s", link.jitt),
+            link.session_type,
+            width = max_len
         );
     }
     info!("RUN mode={:?}", args.mode);
 
+    if args.dry_run {
+        info!("Dry run, arrêt.");
+        return;
+    }
+
     match args.mode {
-        mode::Mode::Parallel => run_parallel(&links, args.iteration,&args.user_agent).await,
-        mode::Mode::Alternate => run_alternate(&links, args.iteration,&args.user_agent).await,
+        mode::Mode::Parallel => run_parallel(&links, args.iteration, &args.user_agent).await,
+        mode::Mode::Alternate => run_alternate(&links, args.iteration, &args.user_agent).await,
     };
 }
 
