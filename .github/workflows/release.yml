@@ -41,6 +41,8 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # ← nécessaire pour créer une release
     steps:
       - uses: actions/download-artifact@v4
 
