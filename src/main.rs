@@ -3,14 +3,12 @@ use clap::Parser;
 mod link;
 use link::Link;
 use link::run_alternate;
+use crate::link::run_parallel;
 mod mode;
 use mode::Mode;
 
 extern crate env_logger;
-use log::debug;
 use log::info;
-use log::warn;
-
 
 #[derive(Parser, Debug)]
 #[command(name = "C2-Simulator")]
@@ -72,7 +70,6 @@ async fn main() {
         }))
         .collect();
     
-    info!("mode={:?}",args.mode);
     // 3. Zippé proprement
     /*for ((url, s), j) in args.urls.iter().zip(sleep_secs.iter()).zip(jitt.iter()) {
         info!("url={} sleep={}s jitt={}", url, s, j);
@@ -92,9 +89,10 @@ async fn main() {
 for link in &links {
     info!("url={} sleep={} ({}s) jitt={}", link.url, link.sleep_str, link.sleep, link.jitt);
 }
+info!("RUN mode={:?}",args.mode);
 
     match args.mode {
-        mode::Mode::Parallel => todo!(),
+        mode::Mode::Parallel => run_parallel(&links,args.iteration).await,
         mode::Mode::Alternate => run_alternate(&links,args.iteration).await,
     };
 
