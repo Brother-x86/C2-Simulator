@@ -62,10 +62,21 @@ struct Args {
     /// Dry run : affiche la configuration et quitte sans exécuter
     #[arg(short = 'r',long = "dry-run")]
     dry_run: bool,
+
+    /// Awesome Banner
+    #[arg(short = 'b',long = "banner")]
+    banner: bool,
+
 }
 
 #[tokio::main]
 async fn main() {
+    // Vérif brute avant clap
+    if std::env::args().any(|a| a == "--banner" || a == "-b") {
+        banner().await;
+    }
+
+    // Clap parse normalement ensuite
     let args = Args::parse();
 
     if args.debug {
@@ -119,6 +130,10 @@ async fn main() {
     .collect();
 
     let max_len = links.iter().map(|l| l.url.len()).max().unwrap_or(0);
+
+    if args.banner {
+        banner().await;
+    }
 
     info!("Links configured :");
     for link in &links {
@@ -176,4 +191,28 @@ fn parse_duration(s: &str) -> Result<u64, String> {
         s.parse::<u64>()
             .map_err(|_| format!("Format invalide : '{}' (ex: 5s, 10m, 2h, 1j)", s))
     }
+}
+
+use tokio::io::AsyncWriteExt;
+use tokio::time::Duration;
+
+pub async fn banner() {
+    let text = format!(
+        r#"
+ ██████╗██████╗     ███████╗██╗███╗   ███╗██╗   ██╗██╗      █████╗ ████████╗ ██████╗ ██████╗ 
+██╔════╝╚════██╗    ██╔════╝██║████╗ ████║██║   ██║██║     ██╔══██╗╚══██╔══╝██╔═══██╗██╔══██╗
+██║      █████╔╝    ███████╗██║██╔████╔██║██║   ██║██║     ███████║   ██║   ██║   ██║██████╔╝
+██║     ██╔═══╝     ╚════██║██║██║╚██╔╝██║██║   ██║██║     ██╔══██║   ██║   ██║   ██║██╔══██╗
+╚██████╗███████╗    ███████║██║██║ ╚═╝ ██║╚██████╔╝███████╗██║  ██║   ██║   ╚██████╔╝██║  ██║
+ ╚═════╝╚══════╝    ╚══════╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
+                                                                                             "#
+    );
+
+    let mut stdout = tokio::io::stdout();
+    for c in text.chars() {
+        stdout.write_all(c.to_string().as_bytes()).await.unwrap();
+        stdout.flush().await.unwrap();
+        tokio::time::sleep(Duration::from_millis(2)).await;
+    }
+    println!();
 }
