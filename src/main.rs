@@ -131,10 +131,6 @@ async fn main() {
 
     let max_len = links.iter().map(|l| l.url.len()).max().unwrap_or(0);
 
-    if args.banner {
-        banner().await;
-    }
-
     info!("Links configured :");
     for link in &links {
         info!(
