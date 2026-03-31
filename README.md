@@ -131,3 +131,11 @@ udp
 ```
 nc -lvup 8000
 ```
+
+
+# Credits
+
+```
+By Brother and Claude
+🔥
+```
