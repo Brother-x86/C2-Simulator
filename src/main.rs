@@ -2,6 +2,7 @@ use clap::Parser;
 
 mod link;
 use link::Link;
+use link::run_alternate;
 mod mode;
 use mode::Mode;
 
@@ -37,12 +38,17 @@ struct Args {
     debug: bool,
 
     /// Mode d'exécution
-    #[arg(short = 'm', long = "mode", default_value = "parallel")]
+    #[arg(short = 'm', long = "mode", default_value = "alternate")]
     mode: Mode,
+
+    /// Nombre d'itérations (-1 = infini)
+    #[arg(short = 'i', long = "iteration", default_value = "-1")]
+    iteration: i64,
 
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Args::parse();
 
     if args.debug {
@@ -87,6 +93,10 @@ for link in &links {
     info!("url={} sleep={} ({}s) jitt={}", link.url, link.sleep_str, link.sleep, link.jitt);
 }
 
+    match args.mode {
+        mode::Mode::Parallel => todo!(),
+        mode::Mode::Alternate => run_alternate(&links,args.iteration).await,
+    };
 
 }
 
@@ -117,32 +127,3 @@ fn parse_duration(s: &str) -> Result<u64, String> {
     }
 }
 
-async fn run_alternate(links: &[Link]) {
-    let client = reqwest::Client::new();
-    let mut iteration = 0u64;
-    let mut index = 0;
-
-    loop {
-        let link = &links[index % links.len()];
-        iteration += 1;
-
-        info!("[{}] #{} url={} sleep={} jitt={}", iteration, link.url, link.sleep_str, link.jitt);
-
-        match client.get(&link.url).send().await {
-            Ok(resp) => info!("[{}] #{} → {}", link.url, iteration, resp.status()),
-            Err(e)   => warn!("[{}] #{} → flux KO: {}", link.url, iteration, e),
-        }
-
-        if link.jitt > 0 && iteration >= link.jitt as u64 {
-            info!("#{} hits atteints, arrêt.", link.jitt);
-            break;
-        }
-
-        if link.sleep > 0 {
-            info!("[{}] sleep {}...", link.url, link.sleep_str);
-            tokio::time::sleep(tokio::time::Duration::from_secs(link.sleep)).await;
-        }
-
-        index += 1;
-    }
-}
